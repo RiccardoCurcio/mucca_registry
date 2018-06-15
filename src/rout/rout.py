@@ -20,7 +20,7 @@ class rout():
 
     def __getBody(self):
         return json.loads(self.request.decode())["body"]
-        
+
     def router(self):
         if self.__getServiceVersion() == 'v1' and self.__getServiceName() == 'registry':
             if self.__getServiceAction() in self.actions:

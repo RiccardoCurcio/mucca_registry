@@ -11,7 +11,8 @@ class controller():
         status = "200"
         if data_response is None:
             status = "404"
-        get_port_response = {"service":{"status": status, "serviceName":"registry","action":"getServicePort"},"head":{},"body":{"port":"not found"}}
+            data_response = None
+        get_port_response = {"service":{"status": status, "serviceName":"registry","action":"getServicePort"},"head":{},"body":{"port":data_response}}
         print(json.dumps(get_port_response))
         return json.dumps(get_port_response)
 

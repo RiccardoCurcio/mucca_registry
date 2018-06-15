@@ -1,10 +1,14 @@
 from pymongo import MongoClient
+import os
 
 class repository:
     def __init__(self):
-        self.client = MongoClient('mongodb://localhost:27017/')
-        self.db = self.client['registry']
-        self.collection = self.db['services']
+        MONGO_CLIENT_ADDR = os.getenv("MONGO_CLIENT")
+        CLIENT_DB = os.getenv("CLIENT_DB")
+        DB_COLLECTION = os.getenv("DB_COLLECTION")
+        self.client = MongoClient(MONGO_CLIENT_ADDR)
+        self.db = self.client[CLIENT_DB]
+        self.collection = self.db[DB_COLLECTION]
         pass
 
     def getServicePort(self, version, name):
