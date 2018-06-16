@@ -24,9 +24,11 @@ class controller():
         if data_response is False:
             status = "409"
             statusMessage = "port already occupied or version/name already exists"
+            data_response = None
         if data_response is "no":
             status = "500"
             statusMessage = "Database error, invalid operation"
-        create_port_response = {"service":{"status":status,"serviceName":"registry","action":"createServicePort"},"head":{},"body":{"statusMessage":statusMessage}}
+            data_response = None
+        create_port_response = {"service":{"status":status,"serviceName":"registry","action":"createServicePort"},"head":{},"body":{"statusMessage":statusMessage,"_id":data_response}}
         print(json.dumps(create_port_response))
         return json.dumps(create_port_response)

@@ -35,9 +35,9 @@ class repository:
         add = {"version": version, "serviceName": name,"port": port}
         if self.getServiceByPort(port) is None:
             try:
-                result = self.collection.insert_one(add)
+                result = self.collection.insert_one(add).inserted_id
                 print('CREATING SERVICE PORT (repository) version {} name: {} port {}'.format(version, name, port))
-                return True
+                return str(result)
             except InvalidOperation as emsg:
                 print('Invalid operation {}'.format(emsg))
                 return "no"
