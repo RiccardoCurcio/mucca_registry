@@ -7,18 +7,19 @@ class controller():
 
     def getServicePort(self, params):
         new_repository = repository()
-        data_response = new_repository.getServicePort(params['version'], params['serviceName'])
+        data_response_port, data_response_host = new_repository.getServicePort(params['version'], params['serviceName'])
         status = "200"
-        if data_response is None:
+        if data_response_port is None:
             status = "404"
-            data_response = None
-        get_port_response = {"service":{"status": status, "serviceName":"registry","action":"getServicePort"},"head":{},"body":{"port":data_response}}
+            data_response_port = None
+            data_response_host = None
+        get_port_response = {"service":{"status": status, "serviceName":"registry","action":"getServicePort"},"head":{},"body":{"port":data_response_port,"host":data_response_host}}
         print(json.dumps(get_port_response))
         return json.dumps(get_port_response)
 
     def createServicePort(self, params):
         new_repository = repository()
-        data_response = new_repository.createServicePort(params['version'], params['serviceName'], params['port'])
+        data_response = new_repository.createServicePort(params['version'], params['serviceName'], params['port'], params['host'])
         status = "201"
         statusMessage = "created"
         if data_response is False:

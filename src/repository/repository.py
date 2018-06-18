@@ -25,23 +25,23 @@ class repository:
         if count is 0:
             print('No match found')
             return None
-        found = get_result.distinct("port")
-        print(found[0])
-        return found[0]
+        port_found = get_result.distinct("port")
+        host_found = get_result.distinct("host")
+        print(port_found[0],host_found[0])
+        return port_found[0],host_found[0]
 
-    def createServicePort(self, version, name, port):
+    def createServicePort(self, version, name, port, host):
         if self.getServicePort(version, name) is not None:
             return False
-        add = {"version": version, "serviceName": name,"port": port}
+        add = {"version": version, "serviceName": name,"port": port, "host": host}
         if self.getServiceByPort(port) is None:
             try:
                 result = self.collection.insert_one(add).inserted_id
-                print('CREATING SERVICE PORT (repository) version {} name: {} port {}'.format(version, name, port))
+                print('CREATING SERVICE PORT (repository) version {} name: {} port {} host {}'.format(version, name, port, host))
                 return str(result)
             except InvalidOperation as emsg:
                 print('Invalid operation {}'.format(emsg))
                 return "no"
-                # err 500?
         return False
 
     def getServiceByPort(self, port):
