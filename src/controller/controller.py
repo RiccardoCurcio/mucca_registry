@@ -18,8 +18,14 @@ class controller():
         return json.dumps(get_port_response)
 
     def createServicePort(self, params):
-        new_repository = repository()
-        data_response = new_repository.createServicePort(params['version'], params['serviceName'], params['port'], params['host'])
+        try:
+            new_repository = repository()
+            data_response = new_repository.createServicePort(params['version'], params['serviceName'], params['port'], params['host'])
+        except KeyError as emsg:
+            data_response = None
+            error_message = {"service":{"status":"400","serviceName":"registry","action":"createServicePort"},"head":{},"body":{"statusMessage":"bad request","_id":data_response}}
+            print("bad request {}".format(emsg))
+            return json.dumps(error_message)
         status = "201"
         statusMessage = "created"
         if data_response is False:

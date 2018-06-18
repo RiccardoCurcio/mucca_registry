@@ -24,14 +24,15 @@ class repository:
             print('Database error: {}'.format(emsg))
         if count is 0:
             print('No match found')
-            return None
+            return None, None
         port_found = get_result.distinct("port")
         host_found = get_result.distinct("host")
         print(port_found[0],host_found[0])
         return port_found[0],host_found[0]
 
     def createServicePort(self, version, name, port, host):
-        if self.getServicePort(version, name) is not None:
+        port_check, host_check = self.getServicePort(version, name)
+        if port_check is not None:
             return False
         add = {"version": version, "serviceName": name,"port": port, "host": host}
         if self.getServiceByPort(port) is None:
