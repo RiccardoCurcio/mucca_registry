@@ -3,6 +3,7 @@ from dotenv import find_dotenv
 import os
 from vendor.mucca_connector_py.mucca_connector import mucca_connector
 from src.rout.rout import rout
+from src.boot.boot import boot
 
 class app():
     def __init__(self, app_name):
@@ -13,6 +14,7 @@ class app():
         pass
 
     def run(self):
+        boot.init()
         mucca_connector_server = mucca_connector()
         mucca_connector_server.serverHandler(int(self.port), int(self.buffersize), registry_routing)
 

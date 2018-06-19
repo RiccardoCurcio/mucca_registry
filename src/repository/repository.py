@@ -3,12 +3,12 @@ import os
 
 class repository:
     def __init__(self):
-        MONGO_CLIENT_ADDR = os.getenv("MONGO_CLIENT")
-        CLIENT_DB = os.getenv("CLIENT_DB")
-        DB_COLLECTION = os.getenv("DB_COLLECTION")
-        self.client = MongoClient(MONGO_CLIENT_ADDR)
-        self.db = self.client[CLIENT_DB]
-        self.collection = self.db[DB_COLLECTION]
+        self.mongo_client_addr = os.getenv("MONGO_CLIENT")
+        self.client_db = os.getenv("CLIENT_DB")
+        self.db_collection = os.getenv("DB_COLLECTION")
+        self.client = MongoClient(self.mongo_client_addr)
+        self.db = self.client[self.client_db]
+        self.collection = self.db[self.db_collection]
         pass
 
     def read(self, version, name):
@@ -48,3 +48,9 @@ class repository:
     def getServiceByPort(self, port):
         check = {"port": port}
         return self.collection.find_one(check)
+
+    def dbCheck(self):
+        db_names = self.client.database_names()
+        if self.client_db not in db_names:
+            return False
+        return True
