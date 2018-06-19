@@ -1,12 +1,13 @@
 import sys
 import json
-
+import os
 from src.controller.controller import controller
 
 class rout():
     def __init__(self, request):
+        self.servicename = os.getenv("SERVICE_NAME")
         self.request = request
-        self.actions = ['getServicePort', 'createServicePort']
+        self.actions = ['read', 'create']
         pass
 
     def __getServiceVersion(self):
@@ -28,4 +29,5 @@ class rout():
                 func = getattr(new_controller, self.__getServiceAction())
                 return func(self.__getBody())
             else:
-                return 'Action not found'
+                error_msg = {"service":{"status":"400","serviceName":"registry","action":self.__getServiceAction()},"head":{"Content-Type":"application/json;charset=utf-8","Mucca-Service":self.servicename},"body":{"statusMessage":"bad request"}}
+                return json.dumps(error_msg)

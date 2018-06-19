@@ -11,7 +11,7 @@ class repository:
         self.collection = self.db[DB_COLLECTION]
         pass
 
-    def getServicePort(self, version, name):
+    def read(self, version, name):
         find = {"version":version,"serviceName":name}
         try:
             get_result = self.collection.find(find)
@@ -30,8 +30,8 @@ class repository:
         print(port_found[0],host_found[0])
         return port_found[0],host_found[0]
 
-    def createServicePort(self, version, name, port, host):
-        port_check, host_check = self.getServicePort(version, name)
+    def create(self, version, name, port, host):
+        port_check, host_check = self.read(version, name)
         if port_check is not None:
             return False
         add = {"version": version, "serviceName": name,"port": port, "host": host}
