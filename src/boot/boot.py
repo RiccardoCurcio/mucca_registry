@@ -14,4 +14,5 @@ class boot:
             port = os.getenv("PORT")
             host = os.getenv("HOST")
             boot_repo.create(version, name, port, host)
+        del boot_repo
         return True
