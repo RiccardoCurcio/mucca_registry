@@ -12,16 +12,44 @@ class rout():
         pass
 
     def __getServiceVersion(self):
-        return json.loads(self.request.decode())["service"]["version"]
+        try:
+            return json.loads(self.request.decode())["service"]["version"]
+        except json.decoder.JSONDecodeError as emsg:
+            logging.log_error(emsg, os.path.abspath(__file__), sys._getframe().f_lineno)
+            return None
+        except KeyError as emsg:
+            logging.log_error(emsg, os.path.abspath(__file__), sys._getframe().f_lineno)
+            return None
 
     def __getServiceName(self):
-        return json.loads(self.request.decode())["service"]["serviceName"]
+        try:
+            return json.loads(self.request.decode())["service"]["serviceName"]
+        except json.decoder.JSONDecodeError as emsg:
+            logging.log_error(emsg, os.path.abspath(__file__), sys._getframe().f_lineno)
+            return None
+        except KeyError as emsg:
+            logging.log_error(emsg, os.path.abspath(__file__), sys._getframe().f_lineno)
+            return None
 
     def __getServiceAction(self):
-        return json.loads(self.request.decode())["service"]["action"]
+        try:
+            return json.loads(self.request.decode())["service"]["action"]
+        except json.decoder.JSONDecodeError as emsg:
+            logging.log_error(emsg, os.path.abspath(__file__), sys._getframe().f_lineno)
+            return None
+        except KeyError as emsg:
+            logging.log_error(emsg, os.path.abspath(__file__), sys._getframe().f_lineno)
+            return None
 
     def __getBody(self):
-        return json.loads(self.request.decode())["body"]
+        try:
+            return json.loads(self.request.decode())["body"]
+        except json.decoder.JSONDecodeError as emsg:
+            logging.log_error(emsg, os.path.abspath(__file__), sys._getframe().f_lineno)
+            return None
+        except KeyError as emsg:
+            logging.log_error(emsg, os.path.abspath(__file__), sys._getframe().f_lineno)
+            return None
 
     def router(self):
         if self.__getServiceVersion() == 'v1' and self.__getServiceName() == 'registry':
@@ -33,3 +61,6 @@ class rout():
                 logging.log_warning('Bad request', os.path.abspath(__file__), sys._getframe().f_lineno)
                 error_msg = {"service":{"status":"400","serviceName":"registry","action":self.__getServiceAction()},"head":{"Content-Type":"application/json;charset=utf-8","Mucca-Service":self.servicename},"body":{"statusMessage":"bad request"}}
                 return json.dumps(error_msg)
+        logging.log_warning('Bad request', os.path.abspath(__file__), sys._getframe().f_lineno)
+        error_msg = {"service":{"status":"400","serviceName":"registry","action":self.__getServiceAction()},"head":{"Content-Type":"application/json;charset=utf-8","Mucca-Service":self.servicename},"body":{"statusMessage":"bad request"}}
+        return json.dumps(error_msg)

@@ -25,7 +25,16 @@ def registry_routing(message):
     return new_request.router()
 
 if __name__ == '__main__':
-    load_dotenv(find_dotenv())
-    service_name = os.getenv("SERVICE_NAME")
-    app = app(service_name)
-    app.run()
+    try:
+        load_dotenv(find_dotenv())
+        service_name = os.getenv("SERVICE_NAME")
+        app = app(service_name)
+        app.run()
+    except KeyboardInterrupt:
+        logging.log_info(
+            "Intercepted KeyboardInterrupt close {}".format(service_name),
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
+        del app
+        sys.exit()
