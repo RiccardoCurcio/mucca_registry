@@ -11,7 +11,7 @@ class app():
     def __init__(self, app_name):
         self.port = os.getenv("PORT")
         self.buffersize = os.getenv("BUFFERSIZE")
-        print(app_name)
+        logging.log_info(app_name, os.path.abspath(__file__), sys._getframe().f_lineno)
         pass
 
     def run(self):
@@ -20,7 +20,7 @@ class app():
         mucca_connector_server.serverHandler(int(self.port), int(self.buffersize), registry_routing)
 
 def registry_routing(message):
-    print(message)
+    logging.log_info(message, os.path.abspath(__file__), sys._getframe().f_lineno)
     new_request = rout(message)
     return new_request.router()
 

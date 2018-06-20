@@ -1,7 +1,8 @@
 import sys
 import json
-import os
+import os, sys
 from src.controller.controller import controller
+from vendor.mucca_logging.mucca_logging import logging
 
 class rout():
     def __init__(self, request):
@@ -29,5 +30,6 @@ class rout():
                 func = getattr(new_controller, self.__getServiceAction())
                 return func(self.__getBody())
             else:
+                logging.log_warning('Bad request', os.path.abspath(__file__), sys._getframe().f_lineno)
                 error_msg = {"service":{"status":"400","serviceName":"registry","action":self.__getServiceAction()},"head":{"Content-Type":"application/json;charset=utf-8","Mucca-Service":self.servicename},"body":{"statusMessage":"bad request"}}
                 return json.dumps(error_msg)
