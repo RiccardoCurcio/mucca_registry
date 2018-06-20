@@ -1,13 +1,14 @@
 from dotenv import load_dotenv
 from dotenv import find_dotenv
-import os
+import os, sys
 from vendor.mucca_connector_py.mucca_connector import mucca_connector
+from vendor.mucca_logging.mucca_logging import logging
 from src.rout.rout import rout
 from src.boot.boot import boot
 
+# logging.log_info("info test", os.path.abspath(__file__), sys._getframe().f_lineno)
 class app():
     def __init__(self, app_name):
-        load_dotenv(find_dotenv())
         self.port = os.getenv("PORT")
         self.buffersize = os.getenv("BUFFERSIZE")
         print(app_name)
@@ -24,5 +25,7 @@ def registry_routing(message):
     return new_request.router()
 
 if __name__ == '__main__':
-    app = app("Mucca registry")
+    load_dotenv(find_dotenv())
+    service_name = os.getenv("SERVICE_NAME")
+    app = app(service_name)
     app.run()
