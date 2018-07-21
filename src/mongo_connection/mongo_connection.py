@@ -63,7 +63,7 @@ class mongo_connection():
         return self.__client
 
     def __attemptCounter(self):
-        ++self.__connection_counter
+        self.__connection_counter += 1
         if self.__connection_counter <= 3:
             logging.log_info(
                 'MongoClient connection attempt n°{}'.format(
