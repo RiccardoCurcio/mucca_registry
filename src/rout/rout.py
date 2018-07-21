@@ -12,6 +12,7 @@ class rout():
     def __init__(self, request):
         """Init."""
         self.servicename = os.getenv("SERVICE_NAME")
+        self.serviceversion = os.getenv("VERSION")
         self.request = request
         self.actions = ['read', 'create']
         pass
@@ -90,7 +91,7 @@ class rout():
 
     def router(self):
         """Router."""
-        if self.__getServiceVersion() == 'v1' and self.__getServiceName() == 'registry':
+        if self.__getServiceVersion() == self.serviceversion and self.__getServiceName() == self.servicename:
             if self.__getServiceAction() in self.actions:
                 new_controller = controller()
                 func = getattr(new_controller, self.__getServiceAction())
@@ -101,12 +102,38 @@ class rout():
                     os.path.abspath(__file__),
                     sys._getframe().f_lineno
                 )
-                error_msg = {"service": {"status": "400", "serviceName": "registry", "action": self.__getServiceAction()}, "head": {"Content-Type": "application/json;charset=utf-8", "Mucca-Service": self.servicename}, "body": {"statusMessage": "bad request"}}
+                error_msg = {
+                    "service": {
+                        "status": "400",
+                        "serviceName": "registry",
+                        "action": self.__getServiceAction()
+                        },
+                    "head": {
+                        "Content-Type": "application/json;charset=utf-8",
+                        "Mucca-Service": self.servicename
+                        },
+                    "body": {
+                        "statusMessage": "bad request"
+                        }
+                    }
                 return json.dumps(error_msg)
         logging.log_warning(
             'Bad request',
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        error_msg = {"service": {"status":"400", "serviceName": "registry", "action": self.__getServiceAction()}, "head": {"Content-Type": "application/json;charset=utf-8", "Mucca-Service": self.servicename}, "body": {"statusMessage": "bad request"}}
+        error_msg = {
+            "service": {
+                "status": "400",
+                "serviceName": "registry",
+                "action": self.__getServiceAction()
+                },
+            "head": {
+                "Content-Type": "application/json;charset=utf-8",
+                "Mucca-Service": self.servicename
+                },
+            "body": {
+                "statusMessage": "bad request"
+                }
+            }
         return json.dumps(error_msg)

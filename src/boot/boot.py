@@ -3,6 +3,7 @@ import os
 import sys
 from src.repository.repository import repository
 from vendor.mucca_logging.mucca_logging import logging
+from src.mongo_connection.mongo_connection import mongo_connection
 
 
 class boot:
@@ -11,7 +12,10 @@ class boot:
     @staticmethod
     def init():
         """Init."""
-        boot_repo = repository()
+        connection_data = mongo_connection.create_connection()
+        print(connection_data)
+        print(connection_data["collection"])
+        boot_repo = repository(connection_data)
         if boot_repo.dbCheck() is False:
             logging.log_info(
                 'Creating database',

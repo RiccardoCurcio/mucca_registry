@@ -3,12 +3,13 @@ from pymongo import MongoClient
 import os
 import sys
 from vendor.mucca_logging.mucca_logging import logging
+from src.mongo_connection.mongo_connection import mongo_connection
 
 
 class repository:
     """Repository class."""
 
-    def __init__(self):
+    def __init__(self, connection):
         """Init."""
         self.mongo_client_addr = os.getenv("MONGO_CLIENT")
         self.client_db = os.getenv("CLIENT_DB")
@@ -16,13 +17,19 @@ class repository:
         self.client = MongoClient(self.mongo_client_addr)
         self.db = self.client[self.client_db]
         self.collection = self.db[self.db_collection]
+        self.connection_data = connection
+        self.coll_conn = connection["collection"]
         pass
 
     def read(self, version, name):
         """Read."""
+        # data = mongo_connection.create_connection()
+        # print(data)
+        # conn = data["collection"]
         find = {"version": version, "serviceName": name}
         try:
-            get_result = self.collection.find(find)
+            # get_result = self.collection.find(find)
+            get_result = self.coll_.find(find)
             logging.log_info(
                 'Repository looking for: name {} version {}'.format(
                     name,
@@ -74,7 +81,12 @@ class repository:
         port_check, host_check = self.read(version, name)
         if port_check is not None:
             return False
-        add = {"version": version, "serviceName": name, "port": port, "host": host}
+        add = {
+            "version": version,
+            "serviceName": name,
+            "port": port,
+            "host": host
+            }
         if self.getServiceByPort(port) is None:
             try:
                 result = self.collection.insert_one(add).inserted_id

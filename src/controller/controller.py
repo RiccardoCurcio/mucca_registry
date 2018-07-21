@@ -36,7 +36,21 @@ class controller():
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
             )
-        get_port_response = {"service": {"status": status, "serviceName": "registry","action": "read"}, "head": {"Content-Type": "application/json;charset=utf-8", "Mucca-Service": self.servicename}, "body": {"port": data_response_port, "host": data_response_host}}
+        get_port_response = {
+            "service": {
+                "status": status,
+                "serviceName": "registry",
+                "action": "read"
+                },
+            "head": {
+                "Content-Type": "application/json;charset=utf-8",
+                "Mucca-Service": self.servicename
+                },
+            "body": {
+                "port": data_response_port,
+                "host": data_response_host
+                }
+            }
         logging.log_info(
             json.dumps(get_port_response),
             os.path.abspath(__file__),
@@ -61,7 +75,21 @@ class controller():
             )
         except KeyError as emsg:
             data_response = None
-            error_message = {"service": {"status": "400", "serviceName": "registry", "action": "create"}, "head": {"Content-Type": "application/json;charset=utf-8", "Mucca-Service": self.servicename}, "body": {"statusMessage": "bad request", "_id": data_response}}
+            error_message = {
+                "service": {
+                    "status": "400",
+                    "serviceName": "registry",
+                    "action": "create"
+                    },
+                "head": {
+                    "Content-Type": "application/json;charset=utf-8",
+                    "Mucca-Service": self.servicename
+                    },
+                "body": {
+                    "statusMessage": "bad request",
+                    "_id": data_response
+                    }
+                }
             logging.log_warning(
                 "bad request {}".format(emsg),
                 os.path.abspath(__file__),
@@ -88,7 +116,21 @@ class controller():
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
             )
-        create_port_response = {"service": {"status": status, "serviceName": "registry", "action": "create"}, "head": {"Content-Type": "application/json;charset=utf-8", "Mucca-Service": self.servicename}, "body": {"statusMessage": statusMessage, "_id": data_response}}
+        create_port_response = {
+            "service": {
+                "status": status,
+                "serviceName": "registry",
+                "action": "create"
+                },
+            "head": {
+                "Content-Type": "application/json;charset=utf-8",
+                "Mucca-Service": self.servicename
+                },
+            "body": {
+                "statusMessage": statusMessage,
+                "_id": data_response
+                }
+            }
         logging.log_info(
             json.dumps(create_port_response),
             os.path.abspath(__file__),
