@@ -9,14 +9,15 @@ import sys
 class controller():
     """Controller class."""
 
-    def __init__(self):
+    def __init__(self, mongo_connection_instance):
         """Init."""
         self.servicename = os.getenv("SERVICE_NAME")
+        self.mongo_connection_instance = mongo_connection_instance
         pass
 
     def read(self, params):
         """Read."""
-        new_repository = repository()
+        new_repository = repository(self.mongo_connection_instance)
         data_response_port, data_response_host = new_repository.read(
             params['version'],
             params['serviceName']
@@ -61,7 +62,7 @@ class controller():
     def create(self, params):
         """Create."""
         try:
-            new_repository = repository()
+            new_repository = repository(self.mongo_connection_instance)
             data_response = new_repository.create(
                 params['version'],
                 params['serviceName'],

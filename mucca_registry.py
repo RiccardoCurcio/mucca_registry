@@ -5,6 +5,7 @@ import os
 import sys
 from vendor.mucca_connector_py.mucca_connector import mucca_connector
 from vendor.mucca_logging.mucca_logging import logging
+from src.mongo_connection.mongo_connection import mongo_connection
 from src.rout.rout import rout
 from src.boot.boot import boot
 
@@ -41,7 +42,7 @@ def registry_routing(message):
         os.path.abspath(__file__),
         sys._getframe().f_lineno
     )
-    new_request = rout(message)
+    new_request = rout(message, mongo_connection_instance)
     return new_request.router()
 
 
@@ -49,6 +50,8 @@ if __name__ == '__main__':
     try:
         load_dotenv(find_dotenv())
         service_name = os.getenv("SERVICE_NAME")
+        client_address = os.getenv("MONGO_CLIENT")
+        mongo_connection_instance = mongo_connection(client_address)
         app = app(service_name)
         app.run()
     except KeyboardInterrupt:

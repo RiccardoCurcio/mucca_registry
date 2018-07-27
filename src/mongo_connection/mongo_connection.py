@@ -62,6 +62,14 @@ class mongo_connection():
             self.setConnection()
         return self.__client
 
+    def closeConnection(self):
+        """Close Mongo Client."""
+        try:
+            self.__client.close()
+            self.__client = None
+        except Exception as emsg:
+            print("**SUCA GINO*** {}".format(emsg))
+
     def __attemptCounter(self):
         self.__connection_counter += 1
         if self.__connection_counter <= 3:

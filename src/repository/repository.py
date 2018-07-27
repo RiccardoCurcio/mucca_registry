@@ -9,27 +9,28 @@ from src.mongo_connection.mongo_connection import mongo_connection
 class repository:
     """Repository class."""
 
-    def __init__(self, connection):
+    def __init__(self, connection_instance):
         """Init."""
-        self.mongo_client_addr = os.getenv("MONGO_CLIENT")
+        # self.mongo_client_addr = os.getenv("MONGO_CLIENT")
         self.client_db = os.getenv("CLIENT_DB")
         self.db_collection = os.getenv("DB_COLLECTION")
-        self.client = MongoClient(self.mongo_client_addr)
+        # self.client = MongoClient(self.mongo_client_addr)
+        # self.connection_data = connection
+        # self.coll_conn = connection["collection"]
+        self.__mongo_instance = connection_instance
+        self.__mongo_instance.setConnection()
+        self.client = self.__mongo_instance.getConnection()
         self.db = self.client[self.client_db]
         self.collection = self.db[self.db_collection]
-        self.connection_data = connection
-        self.coll_conn = connection["collection"]
         pass
 
     def read(self, version, name):
         """Read."""
-        # data = mongo_connection.create_connection()
-        # print(data)
-        # conn = data["collection"]
+        self.__mongo_instance.setConnection()
+        client = self.__mongo_instance.getConnection()
         find = {"version": version, "serviceName": name}
         try:
-            # get_result = self.collection.find(find)
-            get_result = self.coll_.find(find)
+            get_result = self.collection.find(find)
             logging.log_info(
                 'Repository looking for: name {} version {}'.format(
                     name,

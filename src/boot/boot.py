@@ -12,10 +12,9 @@ class boot:
     @staticmethod
     def init():
         """Init."""
-        connection_data = mongo_connection.create_connection()
-        print(connection_data)
-        print(connection_data["collection"])
-        boot_repo = repository(connection_data)
+        client_address = os.getenv("MONGO_CLIENT")
+        mongo_connection_instance = mongo_connection(client_address)
+        boot_repo = repository(mongo_connection_instance)
         if boot_repo.dbCheck() is False:
             logging.log_info(
                 'Creating database',
@@ -29,6 +28,7 @@ class boot:
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
+        mongo_connection_instance.closeConnection()
         del boot_repo
         return True
 

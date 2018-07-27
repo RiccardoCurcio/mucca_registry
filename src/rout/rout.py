@@ -9,12 +9,13 @@ from vendor.mucca_logging.mucca_logging import logging
 class rout():
     """Rout Class."""
 
-    def __init__(self, request):
+    def __init__(self, request, mongo_connection_instance):
         """Init."""
         self.servicename = os.getenv("SERVICE_NAME")
         self.serviceversion = os.getenv("VERSION")
         self.request = request
         self.actions = ['read', 'create']
+        self.mongo_connection_instance = mongo_connection_instance
         pass
 
     def __getServiceVersion(self):
@@ -93,7 +94,7 @@ class rout():
         """Router."""
         if self.__getServiceVersion() == self.serviceversion and self.__getServiceName() == self.servicename:
             if self.__getServiceAction() in self.actions:
-                new_controller = controller()
+                new_controller = controller(self.mongo_connection_instance)
                 func = getattr(new_controller, self.__getServiceAction())
                 return func(self.__getBody())
             else:
