@@ -11,12 +11,8 @@ class repository:
 
     def __init__(self, connection_instance):
         """Init."""
-        # self.mongo_client_addr = os.getenv("MONGO_CLIENT")
         self.client_db = os.getenv("CLIENT_DB")
         self.db_collection = os.getenv("DB_COLLECTION")
-        # self.client = MongoClient(self.mongo_client_addr)
-        # self.connection_data = connection
-        # self.coll_conn = connection["collection"]
         self.__mongo_instance = connection_instance
         self.__mongo_instance.setConnection()
         self.client = self.__mongo_instance.getConnection()
@@ -26,8 +22,6 @@ class repository:
 
     def read(self, version, name):
         """Read."""
-        self.__mongo_instance.setConnection()
-        client = self.__mongo_instance.getConnection()
         find = {"version": version, "serviceName": name}
         try:
             get_result = self.collection.find(find)
@@ -127,3 +121,68 @@ class repository:
         if self.client_db not in db_names:
             return False
         return True
+
+    def update(self, service_id, version, name, port, host):
+        """Update."""
+        logging.log_info(
+            'Updating service...',
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
+        filter = {"_id": service_id}
+        update = {
+            "version": version,
+            "serviceName": name,
+            "port": port,
+            "host": host
+            }
+        try:
+            result = self.collection.update_one(filter, update)
+            return str(result)
+        except Exception as emsg:
+            logging.log_error(
+                'Updating fail. {}'.format(emsg),
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return None
+
+    def delete(self, service_id):
+        """Delete."""
+        logging.log_info(
+            'Deleting service...',
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
+        filter = {"_id": service_id}
+        try:
+            result = self.collection.delete_one(filter)
+            return str(result)
+        except Exception as emsg:
+            logging.log_error(
+                'Updating fail. {}'.format(emsg),
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return None
+
+    def readAll(self):
+        """Read full db."""
+        pass
+# Copyright 2018 Federica Cricchio
+# fefender@gmail.com
+#
+# This file is part of mucca_registry.
+#
+# mucca_registry is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# mucca_registry is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with mucca_registry.  If not, see <http://www.gnu.org/licenses/>.

@@ -19,7 +19,7 @@ class mongo_connection():
         """Set Connection to Mongo."""
         if self.__client is None:
             logging.log_info(
-                'Connecting to MongoClient',
+                'Connecting to MongoClient...',
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
                 )
@@ -74,7 +74,7 @@ class mongo_connection():
         self.__connection_counter += 1
         if self.__connection_counter <= 3:
             logging.log_info(
-                'MongoClient connection attempt n°{}'.format(
+                'MongoClient connection attempt n°{}. Connecting...'.format(
                     self.__connection_counter),
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
@@ -87,3 +87,20 @@ class mongo_connection():
                 sys._getframe().f_lineno
                 )
             sys.exit(1)
+# Copyright 2018 Federica Cricchio
+# fefender@gmail.com
+#
+# This file is part of mucca_registry.
+#
+# mucca_registry is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# mucca_registry is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with mucca_registry.  If not, see <http://www.gnu.org/licenses/>.

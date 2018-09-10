@@ -15,7 +15,7 @@ class controller():
         self.mongo_connection_instance = mongo_connection_instance
         pass
 
-    def read(self, params):
+    def read(self, params, query):
         """Read."""
         new_repository = repository(self.mongo_connection_instance)
         data_response_port, data_response_host = new_repository.read(
@@ -59,7 +59,7 @@ class controller():
         )
         return json.dumps(get_port_response)
 
-    def create(self, params):
+    def create(self, params, query):
         """Create."""
         try:
             new_repository = repository(self.mongo_connection_instance)
@@ -104,7 +104,7 @@ class controller():
             statusMessage = "port already occupied or vers/name already exists"
             data_response = None
             logging.log_warning(
-                'Port occupied or v/name already exists in db',
+                'Port occupied or version/name already exists in db',
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
             )
@@ -138,3 +138,52 @@ class controller():
             sys._getframe().f_lineno
         )
         return json.dumps(create_port_response)
+
+    def update(self, params, query):
+        """Update."""
+        try:
+            new_repository = repository(self.mongo_connection_instance)
+            data_response = new_repository.update(
+                query['_id']
+            )
+            logging.log_info(
+                'Controller Updating...',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+        pass
+
+    def delete(self, params, query):
+        """Delete."""
+        try:
+            new_repository = repository(self.mongo_connection_instance)
+            data_response = new_repository.delete(
+                query['_id'],
+                params['version'],
+                params['serviceName'],
+                params['port'],
+                params['host']
+            )
+            logging.log_info(
+                'Controller Deleting...',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+        pass
+# Copyright 2018 Federica Cricchio
+# fefender@gmail.com
+#
+# This file is part of mucca_registry.
+#
+# mucca_registry is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# mucca_registry is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with mucca_registry.  If not, see <http://www.gnu.org/licenses/>.
