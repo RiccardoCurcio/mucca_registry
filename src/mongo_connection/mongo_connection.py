@@ -85,7 +85,11 @@ class mongo_connection():
             self.__client.close()
             self.__client = None
         except Exception as emsg:
-            print("**SUCA GINO*** {}".format(emsg))
+            logging.log_error(
+                'Connection closing fail: {}'.format(emsg),
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+                )
 
     def __attemptCounter(self):
         self.__connection_counter += 1

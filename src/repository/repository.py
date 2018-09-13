@@ -21,6 +21,7 @@ import os
 import sys
 from vendor.mucca_logging.mucca_logging import logging
 from src.mongo_connection.mongo_connection import mongo_connection
+from bson.objectid import ObjectId
 
 
 class repository:
@@ -73,6 +74,7 @@ class repository:
             return None, None
         port_found = get_result.distinct("port")
         host_found = get_result.distinct("host")
+        id_found = get_result.distinct("_id")
         logging.log_info(
             'Repository found service on port: {} host: {}'.format(
                 port_found[0],
@@ -81,7 +83,7 @@ class repository:
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        return port_found[0], host_found[0]
+        return port_found[0], host_found[0], id_found[0]
 
     def create(self, version, name, port, host):
         """Create."""
@@ -146,12 +148,15 @@ class repository:
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        filter = {"_id": service_id}
+        filter = {"_id": ObjectId(service_id)}
+        print(filter)
         update = {
-            "version": version,
-            "serviceName": name,
-            "port": port,
-            "host": host
+            "$set": {
+                "version": version,
+                "serviceName": name,
+                "port": port,
+                "host": host
+                }
             }
         try:
             result = self.collection.update_one(filter, update)
@@ -171,18 +176,53 @@ class repository:
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        filter = {"_id": service_id}
+        filter = {"_id": ObjectId(service_id)}
         try:
             result = self.collection.delete_one(filter)
-            return str(result)
         except Exception as emsg:
             logging.log_error(
-                'Updating fail. {}'.format(emsg),
+                'Deleting fail, exception raised {}'.format(emsg),
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return None
+        if result.deleted_count == 0:
+            logging.log_warning(
+                'Deleting fail, no service deleted. Deleted_count: 0',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return None
+        return str(result)
+
+    def readAll(self):
+        """Read full db."""
+        try:
+            get_list = list(self.collection.find())
+            logging.log_info(
+                'Getting full collection',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return self.__formatResponse(get_list)
+        except Exception as emsg:
+            logging.log_error(
+                'readAll repository fail, exception raised {}'.format(emsg),
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
             )
             return None
 
-    def readAll(self):
-        """Read full db."""
-        pass
+    def __formatResponse(self, list):
+        """Stringfy idObject and set Database Response."""
+        response = dict()
+        if list is None:
+            return response
+        for x in list:
+            list_element = dict(x)
+            obj_id = list_element['_id']
+            str_id = str(obj_id)
+            list_element.update(_id=str_id)
+            list_to_dict = dict({str_id: list_element})
+            response.update(list_to_dict)
+        return response

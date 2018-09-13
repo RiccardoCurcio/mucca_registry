@@ -31,7 +31,7 @@ class rout():
         self.servicename = os.getenv("SERVICE_NAME")
         self.serviceversion = os.getenv("VERSION")
         self.request = request
-        self.actions = ['read', 'create', 'update', 'delete']
+        self.actions = ['read', 'create', 'update', 'delete', 'readAll']
         self.mongo_connection_instance = mongo_connection_instance
         pass
 

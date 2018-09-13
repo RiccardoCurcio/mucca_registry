@@ -35,7 +35,7 @@ class controller():
     def read(self, params, query):
         """Read."""
         new_repository = repository(self.mongo_connection_instance)
-        data_response_port, data_response_host = new_repository.read(
+        response_port, response_host, response_id = new_repository.read(
             params['version'],
             params['serviceName']
         )
@@ -45,10 +45,11 @@ class controller():
             sys._getframe().f_lineno
         )
         status = "200"
-        if data_response_port is None:
+        if response_port is None:
             status = "404"
-            data_response_port = None
-            data_response_host = None
+            response_port = None
+            response_host = None
+            response_id = None
             logging.log_warning(
                 'Port/host not found',
                 os.path.abspath(__file__),
@@ -65,8 +66,9 @@ class controller():
                 "Mucca-Service": self.servicename
                 },
             "body": {
-                "port": data_response_port,
-                "host": data_response_host
+                "port": response_port,
+                "host": response_host,
+                "_id": str(response_id)
                 }
             }
         logging.log_info(
@@ -161,20 +163,6 @@ class controller():
         try:
             new_repository = repository(self.mongo_connection_instance)
             data_response = new_repository.update(
-                query['_id']
-            )
-            logging.log_info(
-                'Controller Updating...',
-                os.path.abspath(__file__),
-                sys._getframe().f_lineno
-            )
-        pass
-
-    def delete(self, params, query):
-        """Delete."""
-        try:
-            new_repository = repository(self.mongo_connection_instance)
-            data_response = new_repository.delete(
                 query['_id'],
                 params['version'],
                 params['serviceName'],
@@ -182,8 +170,128 @@ class controller():
                 params['host']
             )
             logging.log_info(
+                'Controller Updating...',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            status = "201"
+            statusMessage = "Updated"
+        except Exception as emsg:
+            logging.log_error(
+                'Controller Update error {}'.format(emsg),
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            status = "500"
+            statusMessage = "Update Controller Error"
+        if data_response is None:
+            status = "500"
+            statusMessage = "Update Operation Fail"
+        update_response = {
+            "service": {
+                "status": status,
+                "serviceName": "registry",
+                "action": "update"
+                },
+            "head": {
+                "Content-Type": "application/json;charset=utf-8",
+                "Mucca-Service": self.servicename
+                },
+            "body": {
+                "statusMessage": statusMessage,
+                "_id": query['_id'],
+                "response": data_response
+                }
+            }
+        logging.log_info(
+            json.dumps(update_response),
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
+        return json.dumps(update_response)
+
+    def delete(self, params, query):
+        """Delete."""
+        try:
+            new_repository = repository(self.mongo_connection_instance)
+            data_response = new_repository.delete(
+                query['_id']
+            )
+            logging.log_info(
                 'Controller Deleting...',
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
             )
-        pass
+            status = "200"
+            statusMessage = "Deleted"
+        except Exception as emsg:
+            logging.log_error(
+                'Controller Delete error {}'.format(emsg),
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            status = "500"
+            statusMessage = "Delete Controller error"
+        if data_response is None:
+            logging.log_warning(
+                'No Service Deleted',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            status = "500"
+            statusMessage = "No Service Deleted"
+        delete_response = {
+            "service": {
+                "status": status,
+                "serviceName": "registry",
+                "action": "delete"
+                },
+            "head": {
+                "Content-Type": "application/json;charset=utf-8",
+                "Mucca-Service": self.servicename
+                },
+            "body": {
+                "statusMessage": statusMessage,
+                "_id": query['_id'],
+                "response": data_response
+                }
+            }
+        return json.dumps(delete_response)
+
+    def readAll(self, params, query):
+        """Read full db."""
+        try:
+            new_repository = repository(self.mongo_connection_instance)
+            data_response = new_repository.readAll()
+            status = "200"
+            logging.log_info(
+                'Controller getting full services/port list...',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+        except Exception as emsg:
+            logging.log_error(
+                'Controller readAll error {}'.format(emsg),
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            status = "500"
+        full_read_response = {
+            "service": {
+                "status": status,
+                "serviceName": "registry",
+                "action": "readAll"
+                },
+            "head": {
+                "Content-Type": "application/json;charset=utf-8",
+                "Mucca-Service": self.servicename
+                },
+            "body": {
+                }
+            }
+        if data_response is None:
+            status = "500"
+            return json.dumps(full_read_response)
+        full_read_response['body'].update(data_response)
+        print(full_read_response)
+        return json.dumps(full_read_response)
