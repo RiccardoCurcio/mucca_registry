@@ -71,7 +71,7 @@ class repository:
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
             )
-            return None, None
+            return None, None, None
         port_found = get_result.distinct("port")
         host_found = get_result.distinct("host")
         id_found = get_result.distinct("_id")
@@ -85,16 +85,18 @@ class repository:
         )
         return port_found[0], host_found[0], id_found[0]
 
-    def create(self, version, name, port, host):
+    def create(self, version, name, host, port):
         """Create."""
         logging.log_info(
             'Repository verifying request...',
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        port_check, host_check = self.read(version, name)
+        port_check, host_check, id_check = self.read(version, name)
         if port_check is not None:
             return False
+        if port is None:
+            port = self.__findFreePort()
         add = {
             "version": version,
             "serviceName": name,
@@ -136,7 +138,7 @@ class repository:
 
     def dbCheck(self):
         """DbCheck."""
-        db_names = self.client.database_names()
+        db_names = self.client.list_database_names()
         if self.client_db not in db_names:
             return False
         return True
@@ -193,6 +195,11 @@ class repository:
                 sys._getframe().f_lineno
             )
             return None
+        logging.log_info(
+            'Service Deleted.',
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
         return str(result)
 
     def readAll(self):
@@ -226,3 +233,23 @@ class repository:
             list_to_dict = dict({str_id: list_element})
             response.update(list_to_dict)
         return response
+
+    def __findFreePort(self):
+        """Find a free Port in a range."""
+        logging.log_info(
+            'Searching free port',
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
+        for n in range(1000, 9999):
+            port = str(n)
+            find_port = {"port": port}
+            data = self.collection.find(find_port).count()
+            if data is 0:
+                logging.log_info(
+                    'Free Port Found at: {}'.format(port),
+                    os.path.abspath(__file__),
+                    sys._getframe().f_lineno
+                )
+                return port
+        return None

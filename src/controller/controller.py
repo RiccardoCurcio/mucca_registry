@@ -82,11 +82,15 @@ class controller():
         """Create."""
         try:
             new_repository = repository(self.mongo_connection_instance)
+            if 'port' in params:
+                port = params['port']
+            else:
+                port = None
             data_response = new_repository.create(
                 params['version'],
                 params['serviceName'],
-                params['port'],
-                params['host']
+                params['host'],
+                port
             )
             logging.log_info(
                 'Controller crating...',
