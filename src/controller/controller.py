@@ -86,7 +86,7 @@ class controller():
                 port = params['port']
             else:
                 port = None
-            data_response = new_repository.create(
+            data_response, selected_port = new_repository.create(
                 params['version'],
                 params['serviceName'],
                 params['host'],
@@ -152,7 +152,8 @@ class controller():
                 },
             "body": {
                 "statusMessage": statusMessage,
-                "_id": data_response
+                "_id": data_response,
+                "port": selected_port
                 }
             }
         logging.log_info(

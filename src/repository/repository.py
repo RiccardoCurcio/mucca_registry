@@ -116,7 +116,7 @@ class repository:
                     os.path.abspath(__file__),
                     sys._getframe().f_lineno
                 )
-                return str(result)
+                return str(result), port
             except InvalidOperation as emsg:
                 logging.log_error(
                     'Invalid operation: {}'.format(emsg),
