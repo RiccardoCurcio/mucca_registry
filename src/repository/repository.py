@@ -19,6 +19,7 @@
 from pymongo import MongoClient
 import os
 import sys
+import datetime
 from vendor.mucca_logging.mucca_logging import logging
 from src.mongo_connection.mongo_connection import mongo_connection
 from bson.objectid import ObjectId
@@ -143,6 +144,18 @@ class repository:
             return False
         return True
 
+    def collectionCheck(self):
+        """Check if Collection Exists."""
+        collection_names = self.client.list_database_names()
+        logging.log_info(
+            'Checking if Collection exists...',
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
+        if self.db_collection not in collection_names:
+            return False
+        return True
+
     def update(self, service_id, version, name, port, host):
         """Update."""
         logging.log_info(
@@ -151,18 +164,12 @@ class repository:
             sys._getframe().f_lineno
         )
         filter = {"_id": ObjectId(service_id)}
-        print(filter)
-        update = {
-            "$set": {
-                "version": version,
-                "serviceName": name,
-                "port": port,
-                "host": host
-                }
-            }
+        request = self.__updateRequestFormatter(version, name, port, host)
+        update = {"$set": request}
         try:
             result = self.collection.update_one(filter, update)
-            return str(result)
+            full_data = self.__readById(service_id)
+            return self.__objIdtoString(full_data)
         except Exception as emsg:
             logging.log_error(
                 'Updating fail. {}'.format(emsg),
@@ -220,6 +227,27 @@ class repository:
             )
             return None
 
+    def __readById(self, service_id):
+        """Read db by id."""
+        try:
+            search_id = {"_id": ObjectId(service_id)}
+            full_data = dict(self.collection.find_one(search_id))
+            print(full_data)
+            logging.log_info(
+                'Getting service data by id',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return full_data
+        except Exception as emsg:
+            logging.log_error(
+                'readById repository fail, exception raised {}'.format(emsg),
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return None
+        pass
+
     def __formatResponse(self, list):
         """Stringfy idObject and set Database Response."""
         response = dict()
@@ -233,6 +261,13 @@ class repository:
             list_to_dict = dict({str_id: list_element})
             response.update(list_to_dict)
         return response
+
+    def __objIdtoString(self, lista):
+        """Format update response."""
+        obj_id = lista['_id']
+        str_id = str(obj_id)
+        lista.update(_id=str_id)
+        return lista
 
     def __findFreePort(self):
         """Find a free Port in a range."""
@@ -253,3 +288,19 @@ class repository:
                 )
                 return port
         return None
+
+    def __updateRequestFormatter(self, version, name, port, host):
+        request = dict()
+        if version is not None:
+            version_ltd = dict({"version": version})
+            request.update(version_ltd)
+        if name is not None:
+            name_ltd = dict({"serviceName": name})
+            request.update(name_ltd)
+        if port is not None:
+            port_ltd = dict({"port": port})
+            request.update(port_ltd)
+        if host is not None:
+            host_ltd = dict({"host": host})
+            request.update(host_ltd)
+        return request

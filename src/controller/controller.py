@@ -82,10 +82,9 @@ class controller():
         """Create."""
         try:
             new_repository = repository(self.mongo_connection_instance)
+            port = None
             if 'port' in params:
                 port = params['port']
-            else:
-                port = None
             data_response, selected_port = new_repository.create(
                 params['version'],
                 params['serviceName'],
@@ -167,12 +166,24 @@ class controller():
         """Update."""
         try:
             new_repository = repository(self.mongo_connection_instance)
+            version = None
+            serviceName = None
+            port = None
+            host = None
+            if 'version' in params:
+                version = params['version']
+            if 'serviceName' in params:
+                serviceName = params['serviceName']
+            if 'port' in params:
+                port = params['port']
+            if 'host' in params:
+                host = params['host']
             data_response = new_repository.update(
                 query['_id'],
-                params['version'],
-                params['serviceName'],
-                params['port'],
-                params['host']
+                version,
+                serviceName,
+                port,
+                host
             )
             logging.log_info(
                 'Controller Updating...',
@@ -202,11 +213,7 @@ class controller():
                 "Content-Type": "application/json;charset=utf-8",
                 "Mucca-Service": self.servicename
                 },
-            "body": {
-                "statusMessage": statusMessage,
-                "_id": query['_id'],
-                "response": data_response
-                }
+            "body": data_response
             }
         logging.log_info(
             json.dumps(update_response),

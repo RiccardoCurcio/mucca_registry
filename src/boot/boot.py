@@ -38,6 +38,7 @@ class boot:
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
             )
+            boot_repo.collectionCheck()
             boot.insertMyself(boot_repo)
             boot.insertCrudGenerator(boot_repo)
         logging.log_info(
@@ -61,7 +62,7 @@ class boot:
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        repo_instance.create(version, name, port, host)
+        repo_instance.create(version, name, host, port)
         return None
 
     @staticmethod
@@ -76,5 +77,5 @@ class boot:
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        repo_instance.create(version, name, port, host)
+        repo_instance.create(version, name, host, port)
         return None
