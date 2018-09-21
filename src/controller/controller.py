@@ -166,10 +166,13 @@ class controller():
         """Update."""
         try:
             new_repository = repository(self.mongo_connection_instance)
+            query_id = None
             version = None
             serviceName = None
             port = None
             host = None
+            if '_id' in query:
+                query_id = query['_id']
             if 'version' in params:
                 version = params['version']
             if 'serviceName' in params:
@@ -179,7 +182,7 @@ class controller():
             if 'host' in params:
                 host = params['host']
             data_response = new_repository.update(
-                query['_id'],
+                query_id,
                 version,
                 serviceName,
                 port,
@@ -226,8 +229,11 @@ class controller():
         """Delete."""
         try:
             new_repository = repository(self.mongo_connection_instance)
+            query_id = None
+            if '_id' in query:
+                query_id = query['_id']
             data_response = new_repository.delete(
-                query['_id']
+                query_id
             )
             logging.log_info(
                 'Controller Deleting...',
@@ -264,7 +270,7 @@ class controller():
                 },
             "body": {
                 "statusMessage": statusMessage,
-                "_id": query['_id'],
+                "_id": query_id,
                 "response": data_response
                 }
             }

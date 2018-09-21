@@ -86,6 +86,24 @@ class repository:
         )
         return port_found[0], host_found[0], id_found[0]
 
+    def readAll(self):
+        """Read full db."""
+        try:
+            get_list = list(self.collection.find())
+            logging.log_info(
+                'Getting full collection',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return self.__formatResponse(get_list)
+        except Exception as emsg:
+            logging.log_error(
+                'readAll repository fail, exception raised {}'.format(emsg),
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return None
+
     def create(self, version, name, host, port):
         """Create."""
         logging.log_info(
@@ -98,13 +116,20 @@ class repository:
             return False
         if port is None:
             port = self.__findFreePort()
+        created_at = datetime.datetime.utcnow()
+        updated_at = None
+        deleted_at = None
+
         add = {
             "version": version,
             "serviceName": name,
             "port": port,
-            "host": host
+            "host": host,
+            "created_at": str(created_at),
+            "updated_at": updated_at,
+            "deleted_at": deleted_at
             }
-        if self.getServiceByPort(port) is None:
+        if self.__getServiceByPort(port) is None:
             try:
                 result = self.collection.insert_one(add).inserted_id
                 logging.log_info(
@@ -127,35 +152,6 @@ class repository:
                 return "no"
         return False
 
-    def getServiceByPort(self, port):
-        """GetServiceByPort."""
-        logging.log_info(
-            'Checking if requested port is free...',
-            os.path.abspath(__file__),
-            sys._getframe().f_lineno
-        )
-        check = {"port": port}
-        return self.collection.find_one(check)
-
-    def dbCheck(self):
-        """DbCheck."""
-        db_names = self.client.list_database_names()
-        if self.client_db not in db_names:
-            return False
-        return True
-
-    def collectionCheck(self):
-        """Check if Collection Exists."""
-        collection_names = self.client.list_database_names()
-        logging.log_info(
-            'Checking if Collection exists...',
-            os.path.abspath(__file__),
-            sys._getframe().f_lineno
-        )
-        if self.db_collection not in collection_names:
-            return False
-        return True
-
     def update(self, service_id, version, name, port, host):
         """Update."""
         logging.log_info(
@@ -163,6 +159,13 @@ class repository:
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
+        if service_id is None:
+            logging.log_warning(
+                'Bad request, missing _id',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return None
         filter = {"_id": ObjectId(service_id)}
         request = self.__updateRequestFormatter(version, name, port, host)
         update = {"$set": request}
@@ -172,7 +175,7 @@ class repository:
             return self.__objIdtoString(full_data)
         except Exception as emsg:
             logging.log_error(
-                'Updating fail. {}'.format(emsg),
+                'Updating fail. Bad request {}'.format(emsg),
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
             )
@@ -185,6 +188,13 @@ class repository:
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
+        if service_id is None:
+            logging.log_warning(
+                'Deleting fail, missing id',
+                os.path.abspath(__file__),
+                sys._getframe().f_lineno
+            )
+            return None
         filter = {"_id": ObjectId(service_id)}
         try:
             result = self.collection.delete_one(filter)
@@ -209,30 +219,60 @@ class repository:
         )
         return str(result)
 
-    def readAll(self):
-        """Read full db."""
-        try:
-            get_list = list(self.collection.find())
-            logging.log_info(
-                'Getting full collection',
-                os.path.abspath(__file__),
-                sys._getframe().f_lineno
-            )
-            return self.__formatResponse(get_list)
-        except Exception as emsg:
-            logging.log_error(
-                'readAll repository fail, exception raised {}'.format(emsg),
-                os.path.abspath(__file__),
-                sys._getframe().f_lineno
-            )
-            return None
+    def dbCheck(self):
+        """DbCheck."""
+        db_names = self.client.list_database_names()
+        if self.client_db not in db_names:
+            return False
+        return True
+
+    def collectionCheck(self):
+        """Check if Collection Exists."""
+        collection_names = self.client.list_database_names()
+        logging.log_info(
+            'Checking if Collection exists...',
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
+        if self.db_collection not in collection_names:
+            return False
+        return True
+
+    def __findFreePort(self):
+        """Find a free Port in a range."""
+        logging.log_info(
+            'Searching free port',
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
+        for n in range(1000, 9999):
+            port = str(n)
+            find_port = {"port": port}
+            data = self.collection.find(find_port).count()
+            if data is 0:
+                logging.log_info(
+                    'Free Port Found at: {}'.format(port),
+                    os.path.abspath(__file__),
+                    sys._getframe().f_lineno
+                )
+                return port
+        return None
+
+    def __getServiceByPort(self, port):
+        """Get Service info By Port."""
+        logging.log_info(
+            'Checking if requested port is free...',
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
+        check = {"port": port}
+        return self.collection.find_one(check)
 
     def __readById(self, service_id):
         """Read db by id."""
         try:
             search_id = {"_id": ObjectId(service_id)}
             full_data = dict(self.collection.find_one(search_id))
-            print(full_data)
             logging.log_info(
                 'Getting service data by id',
                 os.path.abspath(__file__),
@@ -269,26 +309,6 @@ class repository:
         lista.update(_id=str_id)
         return lista
 
-    def __findFreePort(self):
-        """Find a free Port in a range."""
-        logging.log_info(
-            'Searching free port',
-            os.path.abspath(__file__),
-            sys._getframe().f_lineno
-        )
-        for n in range(1000, 9999):
-            port = str(n)
-            find_port = {"port": port}
-            data = self.collection.find(find_port).count()
-            if data is 0:
-                logging.log_info(
-                    'Free Port Found at: {}'.format(port),
-                    os.path.abspath(__file__),
-                    sys._getframe().f_lineno
-                )
-                return port
-        return None
-
     def __updateRequestFormatter(self, version, name, port, host):
         request = dict()
         if version is not None:
@@ -303,4 +323,7 @@ class repository:
         if host is not None:
             host_ltd = dict({"host": host})
             request.update(host_ltd)
+        updated_at = datetime.datetime.utcnow()
+        updater_ltd = dict({"updated_at": str(updated_at)})
+        request.update(updater_ltd)
         return request
