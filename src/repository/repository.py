@@ -113,7 +113,7 @@ class repository:
         )
         port_check, host_check, id_check = self.read(version, name)
         if port_check is not None:
-            return False
+            return False, False
         if port is None:
             port = self.__findFreePort()
         created_at = datetime.datetime.utcnow()
@@ -149,8 +149,10 @@ class repository:
                     os.path.abspath(__file__),
                     sys._getframe().f_lineno
                 )
-                return "no"
-        return False
+                err_one = "no"
+                err_two = "no"
+                return err_one, err_two
+        return False, False
 
     def update(self, service_id, version, name, port, host):
         """Update."""
