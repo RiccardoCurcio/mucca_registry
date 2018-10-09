@@ -57,12 +57,13 @@ class boot:
         name = os.getenv("SERVICE_NAME")
         port = os.getenv("PORT")
         host = os.getenv("HOST")
+        flag = 1
         logging.log_info(
             'Inserting myself...',
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        repo_instance.create(version, name, host, port)
+        repo_instance.create(version, name, host, port, flag)
         return None
 
     @staticmethod
@@ -72,10 +73,11 @@ class boot:
         name = os.getenv("CRUD_GENERATOR_NAME")
         port = os.getenv("CRUD_GENERATOR_PORT")
         host = os.getenv("CRUD_GENERATOR_HOST")
+        flag = 1
         logging.log_info(
             'Inserting Crud Generator...',
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        repo_instance.create(version, name, host, port)
+        repo_instance.create(version, name, host, port, flag)
         return None

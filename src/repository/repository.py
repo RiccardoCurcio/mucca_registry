@@ -72,19 +72,21 @@ class repository:
                 os.path.abspath(__file__),
                 sys._getframe().f_lineno
             )
-            return None, None, None
+            return None, None, None, None
         port_found = get_result.distinct("port")
         host_found = get_result.distinct("host")
         id_found = get_result.distinct("_id")
+        flag_found = get_result.distinct("response_flag")
         logging.log_info(
-            'Repository found service on port: {} host: {}'.format(
+            'Repository found service on port: {} host: {} flag: {}'.format(
                 port_found[0],
-                host_found[0]
+                host_found[0],
+                flag_found[0]
             ),
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        return port_found[0], host_found[0], id_found[0]
+        return port_found[0], host_found[0], id_found[0], flag_found[0]
 
     def readAll(self):
         """Read full db."""
@@ -104,22 +106,22 @@ class repository:
             )
             return None
 
-    def create(self, version, name, host, port):
+    def create(self, version, name, host, port, flag):
         """Create."""
         logging.log_info(
             'Repository verifying request...',
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        port_check, host_check, id_check = self.read(version, name)
+        port_check, host_check, id_check, flag_check = self.read(version, name)
         if port_check is not None:
-            return False, False
+            return False, False, False
         if port is None:
             port = self.__findFreePort()
         created_at = datetime.datetime.utcnow()
         updated_at = None
         deleted_at = None
-
+        response_flag = flag
         add = {
             "version": version,
             "serviceName": name,
@@ -127,22 +129,24 @@ class repository:
             "host": host,
             "created_at": str(created_at),
             "updated_at": updated_at,
-            "deleted_at": deleted_at
+            "deleted_at": deleted_at,
+            "response_flag": response_flag
             }
         if self.__getServiceByPort(port) is None:
             try:
                 result = self.collection.insert_one(add).inserted_id
                 logging.log_info(
-                    'Repository creating service port for version {} name: {} port {} host {}'.format(
+                    'Repository creating service port for version {} name: {} port {} host {} flag {}'.format(
                         version,
                         name,
                         port,
-                        host
+                        host,
+                        flag
                     ),
                     os.path.abspath(__file__),
                     sys._getframe().f_lineno
                 )
-                return str(result), port
+                return str(result), port, response_flag
             except InvalidOperation as emsg:
                 logging.log_error(
                     'Invalid operation: {}'.format(emsg),
@@ -151,10 +155,11 @@ class repository:
                 )
                 err_one = "no"
                 err_two = "no"
-                return err_one, err_two
-        return False, False
+                err_three = "no"
+                return err_one, err_two, err_three
+        return False, False, False
 
-    def update(self, service_id, version, name, port, host):
+    def update(self, service_id, version, name, port, host, flag):
         """Update."""
         logging.log_info(
             'Updating service...',
@@ -169,7 +174,7 @@ class repository:
             )
             return None
         filter = {"_id": ObjectId(service_id)}
-        request = self.__updateRequestFormatter(version, name, port, host)
+        request = self.__updateRequestFormatter(version, name, port, host, flag)
         update = {"$set": request}
         try:
             result = self.collection.update_one(filter, update)
@@ -186,7 +191,7 @@ class repository:
     def delete(self, service_id):
         """Delete."""
         logging.log_info(
-            'Deleting service...',
+            'Deleting service id: {}'.format(service_id),
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
@@ -311,7 +316,7 @@ class repository:
         lista.update(_id=str_id)
         return lista
 
-    def __updateRequestFormatter(self, version, name, port, host):
+    def __updateRequestFormatter(self, version, name, port, host, flag):
         request = dict()
         if version is not None:
             version_ltd = dict({"version": version})
@@ -325,6 +330,9 @@ class repository:
         if host is not None:
             host_ltd = dict({"host": host})
             request.update(host_ltd)
+        if flag is not None:
+            flag_ltd = dict({"response_flag": flag})
+            request.update(flag_ltd)
         updated_at = datetime.datetime.utcnow()
         updater_ltd = dict({"updated_at": str(updated_at)})
         request.update(updater_ltd)

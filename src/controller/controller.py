@@ -35,7 +35,7 @@ class controller():
     def read(self, params, query):
         """Read."""
         new_repository = repository(self.mongo_connection_instance)
-        response_port, response_host, response_id = new_repository.read(
+        response_port, response_host, response_id, response_flag = new_repository.read(
             params['version'],
             params['serviceName']
         )
@@ -50,6 +50,7 @@ class controller():
             response_port = None
             response_host = None
             response_id = None
+            response_flag = None
             logging.log_warning(
                 'Port/host not found',
                 os.path.abspath(__file__),
@@ -68,6 +69,7 @@ class controller():
             "body": {
                 "port": response_port,
                 "host": response_host,
+                "response_flag": response_flag,
                 "_id": str(response_id)
                 }
             }
@@ -83,13 +85,17 @@ class controller():
         try:
             new_repository = repository(self.mongo_connection_instance)
             port = None
+            flag = 1
             if 'port' in params:
                 port = params['port']
-            data_response, selected_port = new_repository.create(
+            if 'response_flag' in params:
+                flag = params['response_flag']
+            data_response, selected_port, resp_flag = new_repository.create(
                 params['version'],
                 params['serviceName'],
                 params['host'],
-                port
+                port,
+                flag
             )
             logging.log_info(
                 'Controller crating...',
@@ -125,6 +131,8 @@ class controller():
             status = "409"
             statusMessage = "port already occupied or vers/name already exists"
             data_response = None
+            selected_port = None
+            resp_flag = None
             logging.log_warning(
                 'Port occupied or version/name already exists in db',
                 os.path.abspath(__file__),
@@ -134,6 +142,8 @@ class controller():
             status = "500"
             statusMessage = "Database error, invalid operation"
             data_response = None
+            selected_port = None
+            resp_flag = None
             logging.log_error(
                 'Database error, invalid operation',
                 os.path.abspath(__file__),
@@ -152,7 +162,8 @@ class controller():
             "body": {
                 "statusMessage": statusMessage,
                 "_id": data_response,
-                "port": selected_port
+                "port": selected_port,
+                "response_flag": resp_flag
                 }
             }
         logging.log_info(
@@ -171,6 +182,7 @@ class controller():
             serviceName = None
             port = None
             host = None
+            flag = None
             if '_id' in query:
                 query_id = query['_id']
             if 'version' in params:
@@ -181,12 +193,15 @@ class controller():
                 port = params['port']
             if 'host' in params:
                 host = params['host']
+            if 'response_flag' in params:
+                flag = params['response_flag']
             data_response = new_repository.update(
                 query_id,
                 version,
                 serviceName,
                 port,
-                host
+                host,
+                flag
             )
             logging.log_info(
                 'Controller Updating...',
@@ -234,11 +249,6 @@ class controller():
                 query_id = query['_id']
             data_response = new_repository.delete(
                 query_id
-            )
-            logging.log_info(
-                'Controller Deleting...',
-                os.path.abspath(__file__),
-                sys._getframe().f_lineno
             )
             status = "200"
             statusMessage = "Deleted"
@@ -311,5 +321,9 @@ class controller():
             status = "500"
             return json.dumps(full_read_response)
         full_read_response['body'].update(data_response)
-        print(full_read_response)
+        logging.log_info(
+            'Controller sending full list: {}'.format(full_read_response),
+            os.path.abspath(__file__),
+            sys._getframe().f_lineno
+        )
         return json.dumps(full_read_response)
