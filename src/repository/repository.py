@@ -30,6 +30,8 @@ class repository:
 
     def __init__(self, connection_instance):
         """Init."""
+        self.port_limit_top = os.getenv("PORT_LIMIT_TOP")
+        self.port_limit_bottom = os.getenv("PORT_LIMIT_BOTTOM")
         self.client_db = os.getenv("CLIENT_DB")
         self.db_collection = os.getenv("DB_COLLECTION")
         self.__mongo_instance = connection_instance
@@ -252,8 +254,11 @@ class repository:
             os.path.abspath(__file__),
             sys._getframe().f_lineno
         )
-        for n in range(1000, 9999):
+        # top_limit = self.port_limit_top
+        # bottom_limit = self.port_limit_bottom
+        for n in range(int(self.port_limit_top), int(self.port_limit_bottom)):
             port = str(n)
+            # port = n
             find_port = {"port": port}
             data = self.collection.find(find_port).count()
             if data is 0:
