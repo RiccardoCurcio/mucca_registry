@@ -34,6 +34,7 @@ class controller():
 
     def read(self, params, query):
         """Read."""
+        print("-----", params)
         new_repository = repository(self.mongo_connection_instance)
         response_port, response_host, response_id, response_flag = new_repository.read(
             params['version'],
